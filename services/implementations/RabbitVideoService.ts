@@ -24,7 +24,7 @@ export class RabbitVideoService implements IVideoService {
         if (!videos) {
             throw new Error('Parsing of videos failed');
         }
-        return videos as Video[];
+        return videos;
     }
     async getAllVisibleVideos(): Promise<Video[]> {
         const rpcClient = this.rabbit.createRPCClient({ confirm: true })
@@ -41,10 +41,26 @@ export class RabbitVideoService implements IVideoService {
         if (!videos) {
             throw new Error('Parsing of videos failed');
         }
-        return videos as Video[];
+        return videos;
     }
-    getVideoById(id: number): Promise<any> {
-        throw new Error("Method not implemented.");
+
+    async getVideoById(id: number): Promise<Video | null> {
+        const rpcClient = this.rabbit.createRPCClient({ confirm: true })
+
+        const res = await rpcClient.send('get-video-by-id', id);
+        await rpcClient.close()
+        console.log(res.body);
+
+        if (!res.body) {
+            return null;
+        }
+
+        const video = res.body as Video;
+
+        if (!video) {
+            return null;
+        }
+        return video;
     }
     deleteVideoByID(id: number): Promise<Boolean> {
         throw new Error("Method not implemented.");
