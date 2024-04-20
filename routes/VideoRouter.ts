@@ -1,6 +1,7 @@
 import express, { Router, Request, Response } from 'express'
 import multer from 'multer';
 import { IVideoService } from '../services/IVideoService';
+import e from 'express';
 
 export class VideoRouter {
     private videosRouter: Router;
@@ -77,16 +78,31 @@ export class VideoRouter {
         //  #swagger.description = 'Create a new video'
         try {
             if (req.body == null) { return res.status(400).json({ error: 'Title and duration are required' }); }
-            const videoFile = req.file;
+            // const videoFile = req.file;
 
-            if (videoFile == undefined) {
-                res.status(400).send("No file was sent or misformed file was sent.");
-                return;
-            }
+            // if (videoFile == undefined) {
+            //     res.status(400).send("No file was sent or misformed file was sent.");
+            //     return;
+            // }
             const { title, description } = req.body;
+            // if (title == undefined || description == undefined) {
+            //     res.status(400).json({ error: 'Title and description are required' });
+            //     return;
+            // }
 
             this.videoService.createVideo(title, description).then((video) => {
-                res.status(201).json(video);
+                console.log('Video: ', video);
+                // Check if video is string:
+                if (typeof video === 'string') {
+                    if (video.includes('Title and description')) {
+                        return res.status(400).json({ error: video });
+
+                    };
+                    return res.status(500).json({ error: video })
+                }
+                else {
+                    res.status(201).json(video);
+                }
             });
         } catch (error) {
             console.error('Error creating video:', error);
@@ -105,11 +121,16 @@ export class VideoRouter {
         }
 
         this.videoService.deleteVideoByID(videoId).then((deleted) => {
+            if (typeof deleted === 'string') {
+                if (deleted.includes('Video not found')) {
+                    return res.status(404).send(deleted);
+                }
+            }
             if (deleted) {
-                res.status(204).send();
+                return res.status(204).send();
             }
             else {
-                res.status(404).send("Video not found.");
+                return res.status(404).send("Video not found.");
             }
         });
     }
