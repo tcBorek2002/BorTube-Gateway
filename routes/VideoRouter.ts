@@ -85,10 +85,10 @@ export class VideoRouter {
             //     return;
             // }
             const { title, description } = req.body;
-            // if (title == undefined || description == undefined) {
-            //     res.status(400).json({ error: 'Title and description are required' });
-            //     return;
-            // }
+            if (title == undefined || description == undefined) {
+                res.status(400).json({ error: 'Title and description are required' });
+                return;
+            }
 
             this.videoService.createVideo(title, description).then((video) => {
                 console.log('Video: ', video);
