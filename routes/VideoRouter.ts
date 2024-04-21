@@ -2,6 +2,9 @@ import express, { Router, Request, Response } from 'express'
 import multer from 'multer';
 import { IVideoService } from '../services/IVideoService';
 import e from 'express';
+import { InternalServerError } from '../errors/InternalServerError';
+import { InvalidInputError } from '../errors/InvalidInputError';
+import { NotFoundError } from '../errors/NotFoundError';
 
 export class VideoRouter {
     private videosRouter: Router;
@@ -25,7 +28,12 @@ export class VideoRouter {
         try {
             this.videoService.getAllVisibleVideos().then((videos) => res.send(videos));
         } catch (error) {
-            res.status(500).json({ error: 'Internal Server Error' });
+            if (error instanceof InternalServerError) {
+                res.status(error.code).json({ error: 'Internal Server Error' });
+            }
+            else {
+                res.status(500).json({ error: 'Internal Server Error' });
+            }
         }
     }
 
@@ -41,10 +49,21 @@ export class VideoRouter {
 
         this.videoService.getVideoById(videoId).then((video) => {
             if (!video) {
-                res.status(404).send("Video not found.");
+                res.status(500).send("Internal server error.");
             }
             else {
                 res.send(video);
+            }
+        }).catch((error) => {
+            console.error('Error getting video by ID:', error);
+            if (error instanceof InvalidInputError) {
+                res.status(400).json({ error: 'Invalid video ID' });
+            }
+            else if (error instanceof NotFoundError) {
+                res.status(404).json({ error: 'Video not found' });
+            }
+            else {
+                res.status(500).json({ error: 'Internal Server Error' });
             }
         });
     }

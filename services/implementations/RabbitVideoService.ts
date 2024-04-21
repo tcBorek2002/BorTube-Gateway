@@ -1,6 +1,12 @@
 import Connection from "rabbitmq-client";
 import { IVideoService } from "../IVideoService";
 import { Video } from "../../entities/video/Video";
+import { InternalServerError } from "../../errors/InternalServerError";
+import { ResponseDto } from "../../dtos/ResponseDto";
+import { ErrorDto } from "../../dtos/ErrorDto";
+import { InvalidInputError } from "../../errors/InvalidInputError";
+import e from "express";
+import { NotFoundError } from "../../errors/NotFoundError";
 
 export class RabbitVideoService implements IVideoService {
     private rabbit: Connection;
@@ -16,13 +22,13 @@ export class RabbitVideoService implements IVideoService {
         await rpcClient.close()
 
         if (!res || !res.body || res.contentType !== 'application/json') {
-            throw new Error('Invalid response get-all-videos: ' + res.body);
+            throw new InternalServerError(500, 'Invalid response get-all-videos: ' + res.body);
         }
 
         const videos = res.body as Video[];
 
         if (!videos) {
-            throw new Error('Parsing of videos failed');
+            throw new InternalServerError(500, 'Parsing of videos failed');
         }
         return videos;
     }
@@ -33,34 +39,49 @@ export class RabbitVideoService implements IVideoService {
         await rpcClient.close()
 
         if (!res || !res.body || res.contentType !== 'application/json') {
-            throw new Error('Invalid response get-all-videos: ' + res.body);
+            throw new InternalServerError(500, 'Invalid response get-all-visible-videos: ' + res.body);
         }
 
         const videos = res.body as Video[];
 
         if (!videos) {
-            throw new Error('Parsing of videos failed');
+            throw new InternalServerError(500, 'Parsing of videos failed');
         }
         return videos;
     }
 
-    async getVideoById(id: number): Promise<Video | null> {
+    async getVideoById(id: number): Promise<Video> {
         const rpcClient = this.rabbit.createRPCClient({ confirm: true })
 
-        const res = await rpcClient.send('get-video-by-id', id);
+        const res = await rpcClient.send('get-video-by-id', { id });
         await rpcClient.close()
-        console.log(res.body);
 
         if (!res.body) {
-            return null;
+            throw new InternalServerError(500, 'Invalid response get-video-by-id: ' + res.body);
         }
 
-        const video = res.body as Video;
-
-        if (!video) {
-            return null;
+        if (ResponseDto.isResponseDto(res.body)) {
+            let response = res.body;
+            if (response.success === false) {
+                let error: ErrorDto = response.data as ErrorDto;
+                if (error.code == 400) {
+                    throw new InvalidInputError(400, error.message);
+                }
+                else if (error.code == 404) {
+                    throw new NotFoundError(404, error.message);
+                }
+                else {
+                    throw new InternalServerError(500, error.message);
+                }
+            }
+            else {
+                let video: Video = response.data as Video;
+                return video;
+            }
         }
-        return video;
+        else {
+            throw new InternalServerError(500, 'Parsing of message failed');
+        }
     }
     async deleteVideoByID(id: number): Promise<Boolean | string> {
         const rpcClient = this.rabbit.createRPCClient({ confirm: true })
