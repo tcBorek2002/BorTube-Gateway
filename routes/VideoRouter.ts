@@ -29,7 +29,7 @@ export class VideoRouter {
             this.videoService.getAllVisibleVideos().then((videos) => res.send(videos));
         } catch (error) {
             if (error instanceof InternalServerError) {
-                res.status(error.code).json({ error: 'Internal Server Error' });
+                res.status(error.code).json({ error: error.message });
             }
             else {
                 res.status(500).json({ error: 'Internal Server Error' });

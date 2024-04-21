@@ -21,33 +21,40 @@ export class RabbitVideoService implements IVideoService {
         const res = await rpcClient.send('get-all-videos', '');
         await rpcClient.close()
 
-        if (!res || !res.body || res.contentType !== 'application/json') {
+        if (!res || !res.body || res.contentType !== 'application/json' || !ResponseDto.isResponseDto(res.body)) {
             throw new InternalServerError(500, 'Invalid response get-all-videos: ' + res.body);
         }
 
-        const videos = res.body as Video[];
-
-        if (!videos) {
-            throw new InternalServerError(500, 'Parsing of videos failed');
+        const response = res.body;
+        if (response.success === false) {
+            let error: ErrorDto = response.data as ErrorDto;
+            throw new InternalServerError(500, error.message);
         }
-        return videos;
+        else {
+            let videos: Video[] = response.data as Video[];
+            return videos;
+        }
     }
+
     async getAllVisibleVideos(): Promise<Video[]> {
         const rpcClient = this.rabbit.createRPCClient({ confirm: true })
 
         const res = await rpcClient.send('get-all-visible-videos', '');
         await rpcClient.close()
 
-        if (!res || !res.body || res.contentType !== 'application/json') {
+        if (!res || !res.body || res.contentType !== 'application/json' || !ResponseDto.isResponseDto(res.body)) {
             throw new InternalServerError(500, 'Invalid response get-all-visible-videos: ' + res.body);
         }
 
-        const videos = res.body as Video[];
-
-        if (!videos) {
-            throw new InternalServerError(500, 'Parsing of videos failed');
+        const response = res.body;
+        if (response.success === false) {
+            let error: ErrorDto = response.data as ErrorDto;
+            throw new InternalServerError(500, error.message);
         }
-        return videos;
+        else {
+            let videos: Video[] = response.data as Video[];
+            return videos;
+        }
     }
 
     async getVideoById(id: number): Promise<Video> {
