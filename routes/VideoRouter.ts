@@ -95,38 +95,41 @@ export class VideoRouter {
 
     private createVideo = (req: Request, res: Response) => {
         //  #swagger.description = 'Create a new video'
-        try {
-            if (req.body == null) { return res.status(400).json({ error: 'Title and duration are required' }); }
-            // const videoFile = req.file;
+        if (req.body == null) { return res.status(400).json({ error: 'Title and duration are required' }); }
+        // const videoFile = req.file;
 
-            // if (videoFile == undefined) {
-            //     res.status(400).send("No file was sent or misformed file was sent.");
-            //     return;
-            // }
-            const { title, description } = req.body;
-            if (title == undefined || description == undefined) {
-                res.status(400).json({ error: 'Title and description are required' });
-                return;
-            }
-
-            this.videoService.createVideo(title, description).then((video) => {
-                console.log('Video: ', video);
-                // Check if video is string:
-                if (typeof video === 'string') {
-                    if (video.includes('Title and description')) {
-                        return res.status(400).json({ error: video });
-
-                    };
-                    return res.status(500).json({ error: video })
-                }
-                else {
-                    res.status(201).json(video);
-                }
-            });
-        } catch (error) {
-            console.error('Error creating video:', error);
-            res.status(500).json({ error: 'Internal Server Error' });
+        // if (videoFile == undefined) {
+        //     res.status(400).send("No file was sent or misformed file was sent.");
+        //     return;
+        // }
+        const { title, description } = req.body;
+        if (title == undefined || description == undefined) {
+            res.status(400).json({ error: 'Title and description are required' });
+            return;
         }
+
+        this.videoService.createVideo(title, description).then((video) => {
+            console.log('Video: ', video);
+            // Check if video is string:
+            if (typeof video === 'string') {
+                if (video.includes('Title and description')) {
+                    return res.status(400).json({ error: video });
+
+                };
+                return res.status(500).json({ error: video })
+            }
+            else {
+                res.status(201).json(video);
+            }
+        }).catch((error) => {
+            console.error('Error creating video:', error);
+            if (error instanceof InternalServerError) {
+                res.status(500).json({ error: error.message });
+            }
+            else {
+                res.status(500).json({ error: 'Internal Server Error' });
+            }
+        });
     }
 
     private deleteVideo = (req: Request, res: Response) => {

@@ -95,7 +95,6 @@ export class RabbitVideoService implements IVideoService {
 
         const res = await rpcClient.send('delete-video', { id });
         await rpcClient.close()
-        console.log('bodu', res.body);
 
         if (!res.body) {
             return false;
@@ -129,19 +128,20 @@ export class RabbitVideoService implements IVideoService {
             return "Internal server error";
         }
 
-        const video = res.body as Video;
-
-        if (!isVideo(video)) {
-            if (res.body.error) {
-                return res.body.error;
+        if (ResponseDto.isResponseDto(res.body)) {
+            let response = res.body;
+            if (response.success === false) {
+                let error: ErrorDto = response.data as ErrorDto;
+                throw new InternalServerError(500, error.message);
             }
             else {
-                return "Internal server error";
+                let video: Video = response.data as Video;
+                return video;
             }
         }
-
-        return video;
-
+        else {
+            throw new InternalServerError(500, 'Parsing of message failed');
+        }
     }
     updateVideo({ id, title, description, videoState }: { id: number; title?: string | undefined; description?: string | undefined; videoState?: any; }): Promise<Video> {
         throw new Error("Method not implemented.");
