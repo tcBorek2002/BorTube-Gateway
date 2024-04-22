@@ -70,27 +70,33 @@ export class VideoRouter {
 
     private updateVideo = (req: Request, res: Response) => {
         //  #swagger.description = 'Update a video by its ID'
-        try {
-            const videoId = Number(req.params.id);
+        const videoId = Number(req.params.id);
 
-            // Check if the video ID is a valid number
-            if (isNaN(videoId)) {
-                res.status(400).send('Invalid video ID. Must be a number.');
-                return;
-            }
-            const { title, description, videoState } = req.body;
-
-            // Update the video in the database
-            this.videoService.updateVideo({ id: videoId, title: title, description: description, videoState: videoState }).then((updatedVideo) => {
-                if (updatedVideo != null) { res.status(200).json(updatedVideo) }
-                else {
-                    res.status(404).send("Video not found");
-                }
-            });
-        } catch (error) {
-            console.error('Error updating video:', error);
-            res.status(500).json({ error: 'Internal Server Error' });
+        // Check if the video ID is a valid number
+        if (isNaN(videoId)) {
+            res.status(400).send('Invalid video ID. Must be a number.');
+            return;
         }
+        const { title, description, videoState } = req.body;
+
+        // Update the video in the database
+        this.videoService.updateVideo({ id: videoId, title: title, description: description, videoState: videoState }).then((updatedVideo) => {
+            if (updatedVideo != null) { res.status(200).json(updatedVideo) }
+            else {
+                res.status(404).send("Video not found");
+            }
+        }).catch((error) => {
+            console.error('Error updating video:', error);
+            if (error instanceof InvalidInputError) {
+                return res.status(400).json({ error: error.message });
+            }
+            else if (error instanceof NotFoundError) {
+                return res.status(404).json({ error: 'Video not found' });
+            }
+            else {
+                return res.status(500).json({ error: 'Internal Server Error' });
+            }
+        });
     }
 
     private createVideo = (req: Request, res: Response) => {

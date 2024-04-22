@@ -155,8 +155,38 @@ export class RabbitVideoService implements IVideoService {
         }
     }
 
-    updateVideo({ id, title, description, videoState }: { id: number; title?: string | undefined; description?: string | undefined; videoState?: any; }): Promise<Video> {
-        throw new Error("Method not implemented.");
+    async updateVideo({ id, title, description, videoState }: { id: number; title?: string | undefined; description?: string | undefined; videoState?: any; }): Promise<Video> {
+        const rpcClient = this.rabbit.createRPCClient({ confirm: true })
+
+        const res = await rpcClient.send('update-video', { id, title, description, videoState });
+        await rpcClient.close()
+
+        if (!res.body) {
+            throw new InternalServerError(500, 'Invalid response update video: ' + res.body);
+        }
+
+        if (ResponseDto.isResponseDto(res.body)) {
+            let response = res.body;
+            if (response.success === false) {
+                let error: ErrorDto = response.data as ErrorDto;
+                if (error.code == 400) {
+                    throw new InvalidInputError(400, error.message);
+                }
+                else if (error.code == 404) {
+                    throw new NotFoundError(404, error.message);
+                }
+                else {
+                    throw new InternalServerError(500, error.message);
+                }
+            }
+            else {
+                let video: Video = response.data as Video;
+                return video;
+            }
+        }
+        else {
+            throw new InternalServerError(500, 'Parsing of message failed');
+        }
     }
 }
 
