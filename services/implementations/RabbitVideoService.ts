@@ -5,7 +5,6 @@ import { InternalServerError } from "../../errors/InternalServerError";
 import { ResponseDto } from "../../dtos/ResponseDto";
 import { ErrorDto } from "../../dtos/ErrorDto";
 import { InvalidInputError } from "../../errors/InvalidInputError";
-import e from "express";
 import { NotFoundError } from "../../errors/NotFoundError";
 
 export class RabbitVideoService implements IVideoService {
