@@ -109,25 +109,17 @@ export class VideoRouter {
         }
 
         this.videoService.createVideo(title, description).then((video) => {
-            console.log('Video: ', video);
-            // Check if video is string:
-            if (typeof video === 'string') {
-                if (video.includes('Title and description')) {
-                    return res.status(400).json({ error: video });
-
-                };
-                return res.status(500).json({ error: video })
-            }
-            else {
-                res.status(201).json(video);
-            }
+            return res.status(201).json(video);
         }).catch((error) => {
             console.error('Error creating video:', error);
             if (error instanceof InternalServerError) {
-                res.status(500).json({ error: error.message });
+                return res.status(500).json({ error: error.message });
+            }
+            else if (error instanceof InvalidInputError) {
+                return res.status(400).json({ error: 'Invalid input' });
             }
             else {
-                res.status(500).json({ error: 'Internal Server Error' });
+                return res.status(500).json({ error: 'Internal Server Error' });
             }
         });
     }
@@ -143,16 +135,17 @@ export class VideoRouter {
         }
 
         this.videoService.deleteVideoByID(videoId).then((deleted) => {
-            if (typeof deleted === 'string') {
-                if (deleted.includes('Video not found')) {
-                    return res.status(404).send(deleted);
-                }
+            return res.status(204).send();
+        }).catch((error) => {
+            console.error('Error deleting video:', error);
+            if (error instanceof InvalidInputError) {
+                return res.status(400).json({ error: 'Invalid video ID' });
             }
-            if (deleted) {
-                return res.status(204).send();
+            else if (error instanceof NotFoundError) {
+                return res.status(404).json({ error: 'Video not found' });
             }
             else {
-                return res.status(404).send("Video not found.");
+                return res.status(500).json({ error: 'Internal Server Error' });
             }
         });
     }
