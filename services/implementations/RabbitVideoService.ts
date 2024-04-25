@@ -123,10 +123,10 @@ export class RabbitVideoService implements IVideoService {
         }
     }
 
-    async createVideo(title: string, description: string): Promise<Video> {
+    async createVideo(title: string, description: string, fileName: string): Promise<{ video: Video, sasUrl: string }> {
         const rpcClient = this.rabbit.createRPCClient({ confirm: true })
 
-        const res = await rpcClient.send('create-video', { title, description });
+        const res = await rpcClient.send('create-video', { title, description, fileName });
         await rpcClient.close()
 
         if (!res.body) {
@@ -145,8 +145,8 @@ export class RabbitVideoService implements IVideoService {
                 }
             }
             else {
-                let video: Video = response.data as Video;
-                return video;
+                let returnObject = (response.data as { video: Video, sasUrl: string });
+                return returnObject;
             }
         }
         else {

@@ -6,6 +6,7 @@ import swaggerUi from 'swagger-ui-express';
 import morgan from 'morgan';
 import Connection, { ConnectionOptions } from 'rabbitmq-client';
 import { RabbitVideoService } from './services/implementations/RabbitVideoService';
+import { RabbitVideoUploadService } from './services/implementations/RabbitVideoUploadService';
 
 //For env File 
 dotenv.config();
@@ -50,7 +51,7 @@ rabbit.on('connection', () => {
   console.log('Connection successfully (re)established')
 })
 
-const videoRouter = new VideoRouter(new RabbitVideoService(rabbit)).getRouter();
+const videoRouter = new VideoRouter(new RabbitVideoService(rabbit), new RabbitVideoUploadService(rabbit)).getRouter();
 app.use(videoRouter);
 
 app.listen(port, () => {

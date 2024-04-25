@@ -11,6 +11,19 @@
     "http"
   ],
   "paths": {
+    "/temp": {
+      "get": {
+        "description": "",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
     "/videos": {
       "get": {
         "description": "",
@@ -36,6 +49,9 @@
                   "example": "any"
                 },
                 "description": {
+                  "example": "any"
+                },
+                "fileName": {
                   "example": "any"
                 }
               }
@@ -75,6 +91,9 @@
           },
           "404": {
             "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error"
           }
         }
       },
@@ -140,6 +159,9 @@
           },
           "404": {
             "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error"
           }
         }
       }

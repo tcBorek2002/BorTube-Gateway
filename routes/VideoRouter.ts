@@ -5,23 +5,44 @@ import e from 'express';
 import { InternalServerError } from '../errors/InternalServerError';
 import { InvalidInputError } from '../errors/InvalidInputError';
 import { NotFoundError } from '../errors/NotFoundError';
+import { IVideoUploadService } from '../services/IVideoUploadService';
 
 export class VideoRouter {
     private videosRouter: Router;
     private videoService: IVideoService;
+    private uploadService: IVideoUploadService;
     private upload: multer.Multer;
 
-    constructor(videoService: IVideoService) {
+    constructor(videoService: IVideoService, uploadService: IVideoUploadService) {
         this.videosRouter = express.Router();
         this.upload = multer({ storage: multer.memoryStorage() });
         this.videoService = videoService;
+        this.uploadService = uploadService;
 
         // add prefix to all routes
+        this.videosRouter.get('/temp', this.temp);
         this.videosRouter.get('/videos', this.getAllVideos);
         this.videosRouter.get('/videos/:id', this.getVideoById);
         this.videosRouter.put('/videos/:id', this.updateVideo);
         this.videosRouter.post('/videos', this.upload.single('video'), this.createVideo);
         this.videosRouter.delete('/videos/:id', this.deleteVideo);
+    }
+
+    private temp = (req: Request, res: Response) => {
+        let videoId = "ssdf";
+        let fileName = "cool.mp4";
+
+        this.uploadService.getUploadUrl(videoId, fileName).then((url) => {
+            res.send(url);
+        }).catch((error) => {
+            console.error('Error getting upload url:', error);
+            if (error instanceof InternalServerError) {
+                return res.status(error.code).json({ error: error.message });
+            }
+            else {
+                return res.status(500).json({ error: 'Internal Server Error' });
+            }
+        });
     }
 
     private getAllVideos = (_req: Request, res: Response) => {
@@ -101,21 +122,21 @@ export class VideoRouter {
 
     private createVideo = (req: Request, res: Response) => {
         //  #swagger.description = 'Create a new video'
-        if (req.body == null) { return res.status(400).json({ error: 'Title and duration are required' }); }
+        if (req.body == null) { return res.status(400).json({ error: 'Title, duration and fileName are required' }); }
         // const videoFile = req.file;
 
         // if (videoFile == undefined) {
         //     res.status(400).send("No file was sent or misformed file was sent.");
         //     return;
         // }
-        const { title, description } = req.body;
-        if (title == undefined || description == undefined) {
-            res.status(400).json({ error: 'Title and description are required' });
+        const { title, description, fileName } = req.body;
+        if (title == undefined || description == undefined || fileName == undefined) {
+            res.status(400).json({ error: 'Title, description and fileName are required' });
             return;
         }
 
-        this.videoService.createVideo(title, description).then((video) => {
-            return res.status(201).json(video);
+        this.videoService.createVideo(title, description, fileName).then((returnObj) => {
+            return res.status(201).json(returnObj);
         }).catch((error) => {
             console.error('Error creating video:', error);
             if (error instanceof InternalServerError) {
