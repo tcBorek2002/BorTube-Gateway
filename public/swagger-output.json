@@ -53,6 +53,9 @@
                 },
                 "fileName": {
                   "example": "any"
+                },
+                "duration": {
+                  "example": "any"
                 }
               }
             }

@@ -32,7 +32,7 @@ export class VideoRouter {
         let videoId = "ssdf";
         let fileName = "cool.mp4";
 
-        this.uploadService.getUploadUrl(videoId, fileName).then((url) => {
+        this.uploadService.getUploadUrl(videoId, fileName, 10).then((url) => {
             res.send(url);
         }).catch((error) => {
             console.error('Error getting upload url:', error);
@@ -129,13 +129,13 @@ export class VideoRouter {
         //     res.status(400).send("No file was sent or misformed file was sent.");
         //     return;
         // }
-        const { title, description, fileName } = req.body;
-        if (title == undefined || description == undefined || fileName == undefined) {
-            res.status(400).json({ error: 'Title, description and fileName are required' });
+        const { title, description, fileName, duration } = req.body;
+        if (title == undefined || description == undefined || fileName == undefined || duration == undefined || isNaN(duration)) {
+            res.status(400).json({ error: 'Title, description, fileName and duration are required' });
             return;
         }
 
-        this.videoService.createVideo(title, description, fileName).then((returnObj) => {
+        this.videoService.createVideo(title, description, fileName, duration).then((returnObj) => {
             return res.status(201).json(returnObj);
         }).catch((error) => {
             console.error('Error creating video:', error);

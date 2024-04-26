@@ -10,10 +10,11 @@ export class RabbitVideoUploadService implements IVideoUploadService {
     constructor(connection: Connection) {
         this.rabbit = connection;
     }
-    async getUploadUrl(videoId: string, fileName: string): Promise<string> {
+    async getUploadUrl(videoId: string, fileName: string, duration: number): Promise<string> {
         const rpcClient = this.rabbit.createRPCClient({ confirm: true })
 
-        const res = await rpcClient.send('get-upload-url', { videoId, fileName });
+        const blobName = `${videoId}_${fileName}`;
+        const res = await rpcClient.send('get-upload-url', { blobName, duration });
         await rpcClient.close()
 
         if (!res || !res.body || res.contentType !== 'application/json' || !ResponseDto.isResponseDto(res.body)) {
