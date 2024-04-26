@@ -77,7 +77,7 @@ export class VideoRouter {
                 });
                 if (uploaded) {
                     await this.videoService.updateVideo({ id: videoId, videoState: VideoState.VISIBLE });
-                    return res.status(200).json(uploaded);
+                    return res.status(200).json({ uploaded });
                 }
                 else {
                     return res.status(500).json({ error: 'Internal Server Error' });
