@@ -26,6 +26,7 @@ export class VideoRouter {
         this.videosRouter.put('/videos/:id', this.updateVideo);
         this.videosRouter.post('/videos', this.upload.single('video'), this.createVideo);
         this.videosRouter.delete('/videos/:id', this.deleteVideo);
+        this.videosRouter.post('/videos/:id/uploaded', this.videoUploaded);
     }
 
     private temp = (req: Request, res: Response) => {
@@ -41,6 +42,55 @@ export class VideoRouter {
             }
             else {
                 return res.status(500).json({ error: 'Internal Server Error' });
+            }
+        });
+    }
+
+    private videoUploaded = (req: Request, res: Response) => {
+        const videoId = Number(req.params.id);
+
+        // Check if the video ID is a valid number
+        if (isNaN(videoId)) {
+            res.status(400).send('Invalid video ID. Must be a number.');
+            return;
+        }
+        const { fileName } = req.body;
+
+        this.videoService.getVideoById(videoId).then(async (video) => {
+            if (!video) {
+                res.status(500).send("Internal server error.");
+            }
+            else {
+                if (!video.videoFileId) {
+                    res.status(400).json({ error: 'Video has no video file id' });
+                    return;
+                }
+                let uploaded = await this.uploadService.videoUploaded(videoId, video.videoFileId, fileName).catch((error) => {
+                    console.error('Error getting upload url:', error);
+                    if (error instanceof InternalServerError) {
+                        return res.status(error.code).json({ error: error.message });
+                    }
+                    else {
+                        return res.status(500).json({ error: 'Internal Server Error' });
+                    }
+                });
+                if (uploaded) {
+                    return res.status(200).json(uploaded);
+                }
+                else {
+                    return res.status(500).json({ error: 'Internal Server Error' });
+                }
+            }
+        }).catch((error) => {
+            console.error('Error getting video by ID:', error);
+            if (error instanceof InvalidInputError) {
+                res.status(400).json({ error: 'Invalid video ID' });
+            }
+            else if (error instanceof NotFoundError) {
+                res.status(404).json({ error: 'Video not found' });
+            }
+            else {
+                res.status(500).json({ error: 'Internal Server Error' });
             }
         });
     }
