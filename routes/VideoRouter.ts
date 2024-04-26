@@ -6,6 +6,7 @@ import { InternalServerError } from '../errors/InternalServerError';
 import { InvalidInputError } from '../errors/InvalidInputError';
 import { NotFoundError } from '../errors/NotFoundError';
 import { IVideoUploadService } from '../services/IVideoUploadService';
+import { VideoState } from '../entities/video/VideoState';
 
 export class VideoRouter {
     private videosRouter: Router;
@@ -75,6 +76,7 @@ export class VideoRouter {
                     }
                 });
                 if (uploaded) {
+                    await this.videoService.updateVideo({ id: videoId, videoState: VideoState.VISIBLE });
                     return res.status(200).json(uploaded);
                 }
                 else {
