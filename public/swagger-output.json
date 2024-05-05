@@ -45,6 +45,9 @@
             "schema": {
               "type": "object",
               "properties": {
+                "duration": {
+                  "example": "any"
+                },
                 "title": {
                   "example": "any"
                 },
@@ -52,9 +55,6 @@
                   "example": "any"
                 },
                 "fileName": {
-                  "example": "any"
-                },
-                "duration": {
                   "example": "any"
                 }
               }

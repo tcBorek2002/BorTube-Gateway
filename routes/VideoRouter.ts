@@ -59,7 +59,7 @@ export class VideoRouter {
 
         this.videoService.getVideoById(videoId).then(async (video) => {
             if (!video) {
-                res.status(500).send("Internal server error.");
+                return res.status(500).send("Internal server error.");
             }
             else {
                 if (!video.videoFileId) {
@@ -76,23 +76,25 @@ export class VideoRouter {
                     }
                 });
                 if (uploaded) {
+                    if (res.headersSent) return;
                     await this.videoService.updateVideo({ id: videoId, videoState: VideoState.VISIBLE });
-                    return res.status(200).json({ uploaded });
+                    return res.status(200).json({ uploaded: true });
                 }
                 else {
                     return res.status(500).json({ error: 'Internal Server Error' });
                 }
             }
         }).catch((error) => {
-            console.error('Error getting video by ID:', error);
+            if (res.headersSent) return;
+            console.error('Error checking if video uploaded:', error);
             if (error instanceof InvalidInputError) {
-                res.status(400).json({ error: 'Invalid video ID' });
+                return res.status(400).json({ error: 'Invalid video ID' });
             }
             else if (error instanceof NotFoundError) {
-                res.status(404).json({ error: 'Video not found' });
+                return res.status(404).json({ error: 'Video not found' });
             }
             else {
-                res.status(500).json({ error: 'Internal Server Error' });
+                return res.status(500).json({ error: 'Internal Server Error' });
             }
         });
     }
@@ -181,7 +183,9 @@ export class VideoRouter {
         //     res.status(400).send("No file was sent or misformed file was sent.");
         //     return;
         // }
-        const { title, description, fileName, duration } = req.body;
+        const { title, description, fileName } = req.body;
+        let duration = parseInt(req.body.duration);
+        console.log("BODY", req.body);
         if (title == undefined || description == undefined || fileName == undefined || duration == undefined || isNaN(duration)) {
             res.status(400).json({ error: 'Title, description, fileName and duration are required' });
             return;
