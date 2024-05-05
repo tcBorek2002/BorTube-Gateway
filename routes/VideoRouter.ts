@@ -48,11 +48,11 @@ export class VideoRouter {
     }
 
     private videoUploaded = (req: Request, res: Response) => {
-        const videoId = Number(req.params.id);
+        const videoId = req.params.id;
 
         // Check if the video ID is a valid number
-        if (isNaN(videoId)) {
-            res.status(400).send('Invalid video ID. Must be a number.');
+        if (videoId == null) {
+            res.status(400).send('Video ID is required.');
             return;
         }
         const { fileName } = req.body;
@@ -114,11 +114,11 @@ export class VideoRouter {
 
     private getVideoById = (req: Request, res: Response) => {
         //  #swagger.description = 'Get a video by its ID'
-        const videoId = Number(req.params.id);
+        const videoId = req.params.id;
 
         // Check if the video ID is a valid number
-        if (isNaN(videoId)) {
-            res.status(400).send('Invalid video ID. Must be a number.');
+        if (videoId == null) {
+            res.status(400).send('Video ID is required.');
             return;
         }
 
@@ -145,11 +145,11 @@ export class VideoRouter {
 
     private updateVideo = (req: Request, res: Response) => {
         //  #swagger.description = 'Update a video by its ID'
-        const videoId = Number(req.params.id);
+        const videoId = req.params.id;
 
         // Check if the video ID is a valid number
-        if (isNaN(videoId)) {
-            res.status(400).send('Invalid video ID. Must be a number.');
+        if (videoId == null) {
+            res.status(400).send('Video ID is required.');
             return;
         }
         const { title, description, videoState } = req.body;
@@ -209,11 +209,11 @@ export class VideoRouter {
 
     private deleteVideo = (req: Request, res: Response) => {
         //  #swagger.description = 'Delete a video by its ID'
-        const videoId = Number(req.params.id);
+        const videoId = req.params.id;
 
         // Check if the video ID is a valid number
-        if (isNaN(videoId)) {
-            res.status(400).send('Invalid video ID. Must be a number.');
+        if (videoId == null) {
+            res.status(400).send('Video ID is required.');
             return;
         }
 

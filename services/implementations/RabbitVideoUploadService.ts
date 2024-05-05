@@ -10,7 +10,7 @@ export class RabbitVideoUploadService implements IVideoUploadService {
     constructor(connection: Connection) {
         this.rabbit = connection;
     }
-    async videoUploaded(videoId: number, videoFileId: number, fileName: string): Promise<boolean> {
+    async videoUploaded(videoId: string, videoFileId: string, fileName: string): Promise<boolean> {
         const rpcClient = this.rabbit.createRPCClient({ confirm: true })
 
         const res = await rpcClient.send('check-upload-state', { videoId, videoFileId, fileName });

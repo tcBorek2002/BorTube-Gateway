@@ -1,7 +1,9 @@
+import { VideoState } from "./VideoState";
+
 export type Video = {
-    id: number;
+    id: string;
     title: string;
     description: string;
     videoState: VideoState;
-    videoFileId: number | null;
+    videoFileId: string | null;
 }

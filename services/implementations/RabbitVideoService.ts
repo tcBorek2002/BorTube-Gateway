@@ -56,7 +56,7 @@ export class RabbitVideoService implements IVideoService {
         }
     }
 
-    async getVideoById(id: number): Promise<Video> {
+    async getVideoById(id: string): Promise<Video> {
         const rpcClient = this.rabbit.createRPCClient({ confirm: true })
 
         const res = await rpcClient.send('get-video-by-id', { id });
@@ -89,7 +89,7 @@ export class RabbitVideoService implements IVideoService {
             throw new InternalServerError(500, 'Parsing of message failed');
         }
     }
-    async deleteVideoByID(id: number): Promise<Video> {
+    async deleteVideoByID(id: string): Promise<Video> {
         const rpcClient = this.rabbit.createRPCClient({ confirm: true })
 
         const res = await rpcClient.send('delete-video', { id });
@@ -154,7 +154,7 @@ export class RabbitVideoService implements IVideoService {
         }
     }
 
-    async updateVideo({ id, title, description, videoState }: { id: number; title?: string | undefined; description?: string | undefined; videoState?: any; }): Promise<Video> {
+    async updateVideo({ id, title, description, videoState }: { id: string; title?: string | undefined; description?: string | undefined; videoState?: any; }): Promise<Video> {
         const rpcClient = this.rabbit.createRPCClient({ confirm: true })
 
         const res = await rpcClient.send('update-video', { id, title, description, videoState });
