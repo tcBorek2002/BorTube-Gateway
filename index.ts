@@ -48,8 +48,12 @@ const videoRouter = new VideoRouter(new RabbitVideoService(rabbit), new RabbitVi
 const usersRouter = new UserRouter(rabbitUserService).getRouter();
 
 const app: Application = express();
+if (!process.env.SESSION_SECRET) {
+  console.error('SESSION_SECRET is not set in the environment variables');
+  process.exit(1);
+}
 app.use(session({
-  secret: 'your-secret-key',
+  secret: process.env.SESSION_SECRET,
   resave: false,
   saveUninitialized: false,
 }));
