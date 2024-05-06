@@ -7,6 +7,8 @@ import morgan from 'morgan';
 import Connection, { ConnectionOptions } from 'rabbitmq-client';
 import { RabbitVideoService } from './services/implementations/RabbitVideoService';
 import { RabbitVideoUploadService } from './services/implementations/RabbitVideoUploadService';
+import { UserRouter } from './routes/UserRouter';
+import { RabbitUserService } from './services/implementations/RabbitUserService';
 
 //For env File 
 dotenv.config();
@@ -52,7 +54,9 @@ rabbit.on('connection', () => {
 })
 
 const videoRouter = new VideoRouter(new RabbitVideoService(rabbit), new RabbitVideoUploadService(rabbit)).getRouter();
+const usersRouter = new UserRouter(new RabbitUserService(rabbit)).getRouter();
 app.use(videoRouter);
+app.use(usersRouter);
 
 app.listen(port, () => {
   console.log(`Server is running at http://localhost:${port}`);
