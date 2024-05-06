@@ -4,6 +4,7 @@ import { InvalidInputError } from '../errors/InvalidInputError';
 import { NotFoundError } from '../errors/NotFoundError';
 import { IUserService } from '../services/IUserService';
 import passport from 'passport';
+import { UserDto } from '../dtos/UserDto';
 
 export class UserRouter {
     private usersRouter: Router;

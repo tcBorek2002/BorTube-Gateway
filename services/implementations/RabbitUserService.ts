@@ -8,6 +8,7 @@ import { InvalidInputError } from "../../errors/InvalidInputError";
 import { NotFoundError } from "../../errors/NotFoundError";
 import { IUserService } from "../IUserService";
 import { User } from "../../entities/user/User";
+import { UserDto } from "../../dtos/UserDto";
 
 export class RabbitUserService implements IUserService {
     private rabbit: Connection;
@@ -15,7 +16,7 @@ export class RabbitUserService implements IUserService {
     constructor(connection: Connection) {
         this.rabbit = connection;
     }
-    async authenticateUser(email: string, password: string): Promise<User> {
+    async authenticateUser(email: string, password: string): Promise<UserDto> {
         const rpcClient = this.rabbit.createRPCClient({ confirm: true })
 
         const res = await rpcClient.send('authenticate-user', { email, password });
@@ -40,11 +41,11 @@ export class RabbitUserService implements IUserService {
         }
         else {
             let user: User = response.data as User;
-            return user;
+            return UserDto.fromUser(user);
         }
     }
 
-    async getAllUsers(): Promise<User[]> {
+    async getAllUsers(): Promise<UserDto[]> {
         const rpcClient = this.rabbit.createRPCClient({ confirm: true })
 
         const res = await rpcClient.send('get-all-users', '');
@@ -61,10 +62,11 @@ export class RabbitUserService implements IUserService {
         }
         else {
             let users: User[] = response.data as User[];
-            return users;
+            let dtos = users.map(user => UserDto.fromUser(user));
+            return dtos;
         }
     }
-    async getUserById(id: string): Promise<User> {
+    async getUserById(id: string): Promise<UserDto> {
         const rpcClient = this.rabbit.createRPCClient({ confirm: true })
 
         const res = await rpcClient.send('get-user-by-id', { id });
@@ -89,10 +91,10 @@ export class RabbitUserService implements IUserService {
         }
         else {
             let user: User = response.data as User;
-            return user;
+            return UserDto.fromUser(user);
         }
     }
-    async deleteUserById(id: string): Promise<User> {
+    async deleteUserById(id: string): Promise<UserDto> {
         const rpcClient = this.rabbit.createRPCClient({ confirm: true })
 
         const res = await rpcClient.send('delete-user', { id });
@@ -118,7 +120,7 @@ export class RabbitUserService implements IUserService {
             }
             else {
                 let user: User = response.data as User;
-                return user;
+                return UserDto.fromUser(user);
             }
         }
         else {
@@ -126,7 +128,7 @@ export class RabbitUserService implements IUserService {
         }
     }
 
-    async createUser(email: string, password: string, displayName: string): Promise<User> {
+    async createUser(email: string, password: string, displayName: string): Promise<UserDto> {
         const rpcClient = this.rabbit.createRPCClient({ confirm: true })
 
         const res = await rpcClient.send('create-user', { email, password, displayName });
@@ -149,14 +151,14 @@ export class RabbitUserService implements IUserService {
             }
             else {
                 let user = (response.data as User);
-                return user;
+                return UserDto.fromUser(user);
             }
         }
         else {
             throw new InternalServerError(500, 'Parsing of message failed');
         }
     }
-    async updateUser({ id, email, password, displayName }: { id: string; email?: string | undefined; password?: string | undefined; displayName?: string | undefined; }): Promise<User> {
+    async updateUser({ id, email, password, displayName }: { id: string; email?: string | undefined; password?: string | undefined; displayName?: string | undefined; }): Promise<UserDto> {
         const rpcClient = this.rabbit.createRPCClient({ confirm: true })
 
         const res = await rpcClient.send('update-user', { id, email, password, displayName });
@@ -182,7 +184,7 @@ export class RabbitUserService implements IUserService {
             }
             else {
                 let user: User = response.data as User;
-                return user;
+                return UserDto.fromUser(user);
             }
         }
         else {
