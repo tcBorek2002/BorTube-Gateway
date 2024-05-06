@@ -18,7 +18,7 @@ export class RabbitUserService implements IUserService {
     async authenticateUser(email: string, password: string): Promise<User> {
         const rpcClient = this.rabbit.createRPCClient({ confirm: true })
 
-        const res = await rpcClient.send('authenticate-user', '');
+        const res = await rpcClient.send('authenticate-user', { email, password });
         await rpcClient.close()
 
         if (!res || !res.body || res.contentType !== 'application/json' || !ResponseDto.isResponseDto(res.body)) {

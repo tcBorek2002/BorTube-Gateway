@@ -9,11 +9,77 @@ import { RabbitVideoService } from './services/implementations/RabbitVideoServic
 import { RabbitVideoUploadService } from './services/implementations/RabbitVideoUploadService';
 import { UserRouter } from './routes/UserRouter';
 import { RabbitUserService } from './services/implementations/RabbitUserService';
+import session from 'express-session';
+import passport from 'passport';
+import { Strategy as LocalStrategy } from 'passport-local';
+import { NotFoundError } from './errors/NotFoundError';
+import { User } from './entities/user/User';
+
+
+declare global {
+  namespace Express {
+    interface User {
+      id: string;
+      email: string;
+      displayName: string;
+    }
+  }
+}
 
 //For env File 
 dotenv.config();
 
+// RabbitMQ connection
+const userName = "NodeUser";
+const password = process.env.RABBITMQ_PASSWORD;
+const options: ConnectionOptions = { username: userName, password: password, connectionName: 'Gateway Bortube', hostname: "217.105.22.226" };
+const rabbit = new Connection(options);
+
+rabbit.on('error', (err) => {
+  console.log('RabbitMQ connection error', err)
+})
+rabbit.on('connection', () => {
+  console.log('Connection successfully (re)established')
+})
+
+const rabbitUserService = new RabbitUserService(rabbit);
+
+const videoRouter = new VideoRouter(new RabbitVideoService(rabbit), new RabbitVideoUploadService(rabbit)).getRouter();
+const usersRouter = new UserRouter(rabbitUserService).getRouter();
+
 const app: Application = express();
+app.use(session({
+  secret: 'your-secret-key',
+  resave: false,
+  saveUninitialized: false,
+}));
+
+app.use(passport.initialize());
+app.use(passport.session());
+
+passport.use(new LocalStrategy(
+  async (username, password, done) => {
+    await rabbitUserService.authenticateUser(username, password).then((user) => {
+      return done(null, user);
+    }).catch((error) => {
+      if (error instanceof NotFoundError) {
+        return done(null, false, { message: 'Incorrect username or password.' });
+      }
+      else {
+        return done(null, false, error);
+      }
+    });
+  }
+));
+
+
+passport.serializeUser((user, done) => {
+  return done(null, user);
+});
+passport.deserializeUser((user: Express.User, done) => {
+  return done(null, user)
+});
+
 app.use(bodyParser.json());
 app.use((req, res, next) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -40,21 +106,6 @@ app.get('/', (req: Request, res: Response) => {
   res.send('Welcome to BorTube API!');
 });
 
-// RabbitMQ connection
-const userName = "NodeUser";
-const password = process.env.RABBITMQ_PASSWORD;
-const options: ConnectionOptions = { username: userName, password: password, connectionName: 'Gateway Bortube', hostname: "217.105.22.226" };
-const rabbit = new Connection(options);
-
-rabbit.on('error', (err) => {
-  console.log('RabbitMQ connection error', err)
-})
-rabbit.on('connection', () => {
-  console.log('Connection successfully (re)established')
-})
-
-const videoRouter = new VideoRouter(new RabbitVideoService(rabbit), new RabbitVideoUploadService(rabbit)).getRouter();
-const usersRouter = new UserRouter(new RabbitUserService(rabbit)).getRouter();
 app.use(videoRouter);
 app.use(usersRouter);
 

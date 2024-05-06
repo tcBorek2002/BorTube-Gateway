@@ -8,6 +8,7 @@ import { NotFoundError } from '../errors/NotFoundError';
 import { IVideoUploadService } from '../services/IVideoUploadService';
 import { VideoState } from '../entities/video/VideoState';
 import { IUserService } from '../services/IUserService';
+import passport from 'passport';
 
 export class UserRouter {
     private usersRouter: Router;
@@ -18,10 +19,32 @@ export class UserRouter {
         this.userService = userService;
 
         // add prefix to all routes
+        this.usersRouter.post('/login', passport.authenticate('local'), this.login);
         this.usersRouter.get('/users/:id', this.getUserById);
         this.usersRouter.put('/users/:id', this.updateUser);
         this.usersRouter.post('/users', this.createUser);
         this.usersRouter.delete('/users/:id', this.deleteUser);
+    }
+
+    private login = (req: Request, res: Response) => {
+        //  #swagger.description = 'Login a user'
+        //  #swagger.parameters['body'] = {
+        //   in: 'body',
+        //   required: true,
+        //   type: 'object',
+        //   schema: 
+        //    {username: '
+        //      type: 'string',
+        //      required: true,
+        //      description: 'The email of the user'
+        //    },
+        //    {password: '
+        //      type: 'string',
+        //      required: true,
+        //      description: 'The password of the user'
+        //    }
+        // }
+        res.status(200).json({ message: 'Login successful' });
     }
 
     private getUserById = (req: Request, res: Response) => {
