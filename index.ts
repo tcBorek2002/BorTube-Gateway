@@ -74,7 +74,7 @@ passport.use(new LocalStrategy(
 
 
 passport.serializeUser((user, done) => {
-  return done(null, user);
+  return done(null, { id: user.id, email: user.email, displayName: user.displayName });
 });
 passport.deserializeUser((user: Express.User, done) => {
   return done(null, user)
