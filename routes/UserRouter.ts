@@ -1,12 +1,7 @@
 import express, { Router, Request, Response } from 'express'
-import multer from 'multer';
-import { IVideoService } from '../services/IVideoService';
-import e from 'express';
 import { InternalServerError } from '../errors/InternalServerError';
 import { InvalidInputError } from '../errors/InvalidInputError';
 import { NotFoundError } from '../errors/NotFoundError';
-import { IVideoUploadService } from '../services/IVideoUploadService';
-import { VideoState } from '../entities/video/VideoState';
 import { IUserService } from '../services/IUserService';
 import passport from 'passport';
 
@@ -20,6 +15,7 @@ export class UserRouter {
 
         // add prefix to all routes
         this.usersRouter.post('/login', passport.authenticate('local'), this.login);
+        this.usersRouter.post('/logout', this.logout);
         this.usersRouter.get('/users/:id', this.getUserById);
         this.usersRouter.put('/users/:id', this.updateUser);
         this.usersRouter.post('/users', this.createUser);
@@ -45,6 +41,19 @@ export class UserRouter {
         //    }
         // }
         res.status(200).json({ message: 'Login successful' });
+    }
+
+    private logout = (req: Request, res: Response) => {
+        //  #swagger.description = 'Logout a user'
+        console.log('Logging out user:', req.user);
+        req.logout((err: any) => {
+            if (err) {
+                console.error('Error logging out user:', err);
+                res.status(500).json({ error: 'Internal Server Error' });
+            } else {
+                res.status(200).json({ message: 'Logout successful' });
+            }
+        });
     }
 
     private getUserById = (req: Request, res: Response) => {

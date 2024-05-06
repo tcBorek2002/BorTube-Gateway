@@ -56,6 +56,19 @@
         }
       }
     },
+    "/logout": {
+      "post": {
+        "description": "Logout a user",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
     "/users/{id}": {
       "get": {
         "description": "Get a user by its ID",
