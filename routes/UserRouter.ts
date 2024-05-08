@@ -41,7 +41,7 @@ export class UserRouter {
         //      description: 'The password of the user'
         //    }
         // }
-        res.status(200).json({ message: 'Login successful' });
+        res.status(200).json({ message: 'Login successful', userId: req.user?.id });
     }
 
     private logout = (req: Request, res: Response) => {
