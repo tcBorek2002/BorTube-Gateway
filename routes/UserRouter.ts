@@ -15,7 +15,7 @@ export class UserRouter {
         this.userService = userService;
 
         // add prefix to all routes
-        this.usersRouter.post('/login', passport.authenticate('local'), this.login);
+        this.usersRouter.post('/login', passport.authenticate('local', { failWithError: true }), this.login);
         this.usersRouter.post('/logout', this.logout);
         this.usersRouter.get('/users/:id', this.getUserById);
         this.usersRouter.put('/users/:id', this.updateUser);
@@ -41,6 +41,7 @@ export class UserRouter {
         //      description: 'The password of the user'
         //    }
         // }
+        console.log("Login request: ", req.body);
         res.status(200).json({ message: 'Login successful', userId: req.user?.id });
     }
 
@@ -52,7 +53,12 @@ export class UserRouter {
                 console.error('Error logging out user:', err);
                 res.status(500).json({ error: 'Internal Server Error' });
             } else {
-                res.status(200).json({ message: 'Logout successful' });
+                res.status(200).clearCookie('connect.sid', {
+                    path: '/'
+                });
+                req.session.destroy(function (err) {
+                    res.redirect('/');
+                });
             }
         });
     }
