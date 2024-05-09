@@ -191,7 +191,7 @@ export class VideoRouter {
             return;
         }
 
-        this.videoService.createVideo(title, description, fileName, duration).then((returnObj) => {
+        this.videoService.createVideo("PUT USER ID HERE", title, description, fileName, duration).then((returnObj) => {
             return res.status(201).json(returnObj);
         }).catch((error) => {
             console.error('Error creating video:', error);

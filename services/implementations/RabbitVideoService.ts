@@ -6,6 +6,7 @@ import { ResponseDto } from "../../dtos/ResponseDto";
 import { ErrorDto } from "../../dtos/ErrorDto";
 import { InvalidInputError } from "../../errors/InvalidInputError";
 import { NotFoundError } from "../../errors/NotFoundError";
+import { VideoDto } from "../../entities/video/VideoDto";
 
 export class RabbitVideoService implements IVideoService {
     private rabbit: Connection;
@@ -14,7 +15,7 @@ export class RabbitVideoService implements IVideoService {
         this.rabbit = connection;
     }
 
-    async getAllVideos(): Promise<Video[]> {
+    async getAllVideos(): Promise<VideoDto[]> {
         const rpcClient = this.rabbit.createRPCClient({ confirm: true })
 
         const res = await rpcClient.send('get-all-videos', '');
@@ -30,12 +31,12 @@ export class RabbitVideoService implements IVideoService {
             throw new InternalServerError(500, error.message);
         }
         else {
-            let videos: Video[] = response.data as Video[];
+            let videos: VideoDto[] = response.data as VideoDto[];
             return videos;
         }
     }
 
-    async getAllVisibleVideos(): Promise<Video[]> {
+    async getAllVisibleVideos(): Promise<VideoDto[]> {
         const rpcClient = this.rabbit.createRPCClient({ confirm: true })
 
         const res = await rpcClient.send('get-all-visible-videos', '');
@@ -51,12 +52,12 @@ export class RabbitVideoService implements IVideoService {
             throw new InternalServerError(500, error.message);
         }
         else {
-            let videos: Video[] = response.data as Video[];
+            let videos: VideoDto[] = response.data as VideoDto[];
             return videos;
         }
     }
 
-    async getVideoById(id: string): Promise<Video> {
+    async getVideoById(id: string): Promise<VideoDto> {
         const rpcClient = this.rabbit.createRPCClient({ confirm: true })
 
         const res = await rpcClient.send('get-video-by-id', { id });
@@ -81,7 +82,7 @@ export class RabbitVideoService implements IVideoService {
                 }
             }
             else {
-                let video: Video = response.data as Video;
+                let video: VideoDto = response.data as VideoDto;
                 return video;
             }
         }
@@ -89,7 +90,7 @@ export class RabbitVideoService implements IVideoService {
             throw new InternalServerError(500, 'Parsing of message failed');
         }
     }
-    async deleteVideoByID(id: string): Promise<Video> {
+    async deleteVideoByID(id: string): Promise<VideoDto> {
         const rpcClient = this.rabbit.createRPCClient({ confirm: true })
 
         const res = await rpcClient.send('delete-video', { id });
@@ -114,7 +115,7 @@ export class RabbitVideoService implements IVideoService {
                 }
             }
             else {
-                let video: Video = response.data as Video;
+                let video: VideoDto = response.data as VideoDto;
                 return video;
             }
         }
@@ -123,10 +124,10 @@ export class RabbitVideoService implements IVideoService {
         }
     }
 
-    async createVideo(title: string, description: string, fileName: string, duration: number): Promise<{ video: Video, sasUrl: string }> {
+    async createVideo(userId: string, title: string, description: string, fileName: string, duration: number): Promise<{ video: VideoDto, sasUrl: string }> {
         const rpcClient = this.rabbit.createRPCClient({ confirm: true })
 
-        const res = await rpcClient.send('create-video', { title, description, fileName, duration });
+        const res = await rpcClient.send('create-video', { userId, title, description, fileName, duration });
         await rpcClient.close()
 
         if (!res.body) {
@@ -145,7 +146,7 @@ export class RabbitVideoService implements IVideoService {
                 }
             }
             else {
-                let returnObject = (response.data as { video: Video, sasUrl: string });
+                let returnObject = (response.data as { video: VideoDto, sasUrl: string });
                 return returnObject;
             }
         }
@@ -154,7 +155,7 @@ export class RabbitVideoService implements IVideoService {
         }
     }
 
-    async updateVideo({ id, title, description, videoState }: { id: string; title?: string | undefined; description?: string | undefined; videoState?: any; }): Promise<Video> {
+    async updateVideo({ id, title, description, videoState }: { id: string; title?: string | undefined; description?: string | undefined; videoState?: any; }): Promise<VideoDto> {
         const rpcClient = this.rabbit.createRPCClient({ confirm: true })
 
         const res = await rpcClient.send('update-video', { id, title, description, videoState });
@@ -179,7 +180,7 @@ export class RabbitVideoService implements IVideoService {
                 }
             }
             else {
-                let video: Video = response.data as Video;
+                let video: VideoDto = response.data as VideoDto;
                 return video;
             }
         }

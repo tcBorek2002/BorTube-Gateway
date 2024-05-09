@@ -1,8 +1,11 @@
 import { VideoState } from "./VideoState";
 
-export type Video = {
+export type VideoDto = {
     id: string;
-    userId: string;
+    user: {
+        id: string;
+        displayName: string;
+    };
     title: string;
     description: string;
     videoState: VideoState;
