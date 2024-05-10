@@ -176,6 +176,10 @@ export class VideoRouter {
 
     private createVideo = (req: Request, res: Response) => {
         //  #swagger.description = 'Create a new video'
+        let user = req.user;
+        if (user == null) {
+            return res.status(401).json({ error: 'Unauthorized' });
+        }
         if (req.body == null) { return res.status(400).json({ error: 'Title, duration and fileName are required' }); }
         // const videoFile = req.file;
 
@@ -191,7 +195,7 @@ export class VideoRouter {
             return;
         }
 
-        this.videoService.createVideo("PUT USER ID HERE", title, description, fileName, duration).then((returnObj) => {
+        this.videoService.createVideo(user.id, title, description, fileName, duration).then((returnObj) => {
             return res.status(201).json(returnObj);
         }).catch((error) => {
             console.error('Error creating video:', error);
