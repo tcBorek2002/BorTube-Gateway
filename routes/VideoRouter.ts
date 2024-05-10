@@ -7,6 +7,7 @@ import { InvalidInputError } from '../errors/InvalidInputError';
 import { NotFoundError } from '../errors/NotFoundError';
 import { IVideoUploadService } from '../services/IVideoUploadService';
 import { VideoState } from '../entities/video/VideoState';
+import { VideoDto } from '../entities/video/VideoDto';
 
 export class VideoRouter {
     private videosRouter: Router;
@@ -211,7 +212,7 @@ export class VideoRouter {
         });
     }
 
-    private deleteVideo = (req: Request, res: Response) => {
+    private deleteVideo = async (req: Request, res: Response) => {
         //  #swagger.description = 'Delete a video by its ID'
         const videoId = req.params.id;
 
@@ -219,6 +220,26 @@ export class VideoRouter {
         if (videoId == null) {
             res.status(400).send('Video ID is required.');
             return;
+        }
+
+        const video = await this.videoService.getVideoById(videoId).catch((error) => {
+            console.error('Error getting video by ID:', error);
+            if (error instanceof InvalidInputError) {
+                return res.status(400).json({ error: 'Invalid video ID' });
+            }
+            else if (error instanceof NotFoundError) {
+                return res.status(404).json({ error: 'Video not found' });
+            }
+            else {
+                return res.status(500).json({ error: 'Internal Server Error' });
+            }
+        });
+
+        if (video == null) {
+            return res.status(404).json({ error: 'Video not found' });
+        }
+        if (req.user && (video as VideoDto).user?.id !== req.user.id) {
+            return res.status(401).json({ error: 'Unauthorized' });
         }
 
         this.videoService.deleteVideoByID(videoId).then((deleted) => {
