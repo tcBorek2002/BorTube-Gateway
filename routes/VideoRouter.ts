@@ -22,30 +22,12 @@ export class VideoRouter {
         this.uploadService = uploadService;
 
         // add prefix to all routes
-        this.videosRouter.get('/temp', this.temp);
         this.videosRouter.get('/videos', this.getAllVideos);
         this.videosRouter.get('/videos/:id', this.getVideoById);
         this.videosRouter.put('/videos/:id', this.updateVideo);
         this.videosRouter.post('/videos', this.upload.single('video'), this.createVideo);
         this.videosRouter.delete('/videos/:id', this.deleteVideo);
         this.videosRouter.post('/videos/:id/uploaded', this.videoUploaded);
-    }
-
-    private temp = (req: Request, res: Response) => {
-        let videoId = "ssdf";
-        let fileName = "cool.mp4";
-
-        this.uploadService.getUploadUrl(videoId, fileName, 10).then((url) => {
-            res.send(url);
-        }).catch((error) => {
-            console.error('Error getting upload url:', error);
-            if (error instanceof InternalServerError) {
-                return res.status(error.code).json({ error: error.message });
-            }
-            else {
-                return res.status(500).json({ error: 'Internal Server Error' });
-            }
-        });
     }
 
     private videoUploaded = (req: Request, res: Response) => {
