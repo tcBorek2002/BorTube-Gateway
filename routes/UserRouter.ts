@@ -66,10 +66,19 @@ export class UserRouter {
     private getUserById = (req: Request, res: Response) => {
         //  #swagger.description = 'Get a user by its ID'
         const userId = req.params.id;
+        if (req.user == null) {
+            res.status(401).json({ error: 'Unauthorized' });
+            return;
+        }
 
         // Check if the video ID is a valid number
         if (userId == null) {
             res.status(400).send('User ID is required.');
+            return;
+        }
+
+        if (req.user.id != userId) {
+            res.status(403).json({ error: 'Forbidden' });
             return;
         }
 
@@ -102,6 +111,14 @@ export class UserRouter {
         if (userId == null) {
             res.status(400).send('User ID is required.');
             return;
+        }
+
+        if (req.user == null) {
+            return res.status(401).json({ error: 'Unauthorized' });
+        }
+
+        if (req.user.id != userId) {
+            return res.status(403).json({ error: 'Forbidden' });
         }
         const { email, password, displayName } = req.body;
 
@@ -158,6 +175,15 @@ export class UserRouter {
         // Check if the video ID is a valid number
         if (userId == null) {
             res.status(400).send('User ID is required.');
+            return;
+        }
+
+        if (req.user == null) {
+            return res.status(401).json({ error: 'Unauthorized' });
+        }
+
+        if (req.user.id != userId) {
+            res.status(403).json({ error: 'Forbidden' });
             return;
         }
 
