@@ -130,6 +130,10 @@ export class VideoRouter {
         //  #swagger.description = 'Update a video by its ID'
         const videoId = req.params.id;
 
+        if (req.user == null) {
+            return res.status(401).json({ error: 'Unauthorized' });
+        }
+
         // Check if the video ID is a valid number
         if (videoId == null) {
             res.status(400).send('Video ID is required.');
@@ -202,6 +206,10 @@ export class VideoRouter {
         if (videoId == null) {
             res.status(400).send('Video ID is required.');
             return;
+        }
+
+        if (req.user == null) {
+            return res.status(401).json({ error: 'Unauthorized' });
         }
 
         const video = await this.videoService.getVideoById(videoId).catch((error) => {
