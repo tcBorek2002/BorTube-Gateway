@@ -3,7 +3,6 @@ import { BlobDeleteOptions, BlobServiceClient } from '@azure/storage-blob';
 import 'dotenv/config'
 import { getVideoDurationInSeconds } from 'get-video-duration';
 import { Readable } from 'stream';
-import { Storage } from '@google-cloud/storage';
 import prisma from '../client';
 import { VideoService } from './implementations/VideoService';
 import { PrismaVideoRepository } from '../repositories/implementations/PrismaVideoRepository';
@@ -93,43 +92,43 @@ export async function uploadVideo(videoFile: Express.Multer.File, videoId: numbe
     }
 }
 
-export async function uploadVideoGoogleCloud(videoFile: Express.Multer.File, videoId: number) {
-    if (azureStorageConnectionString == undefined) {
-        return false;
-    }
+// export async function uploadVideoGoogleCloud(videoFile: Express.Multer.File, videoId: number) {
+//     if (azureStorageConnectionString == undefined) {
+//         return false;
+//     }
 
-    const storage = new Storage({ projectId: 'theta-grid-417116', keyFilename: 'assets\\gcp-key.json' });
-    const blobName = videoId + "_" + videoFile.originalname;
+//     const storage = new Storage({ projectId: 'theta-grid-417116', keyFilename: 'assets\\gcp-key.json' });
+//     const blobName = videoId + "_" + videoFile.originalname;
 
-    try {
-        await storage.bucket('bortube_bucket').file(blobName).save(videoFile.buffer);
-        return true;
-    } catch (error) {
-        console.error("Error uploading video:", error);
-        return false;
-    }
-}
+//     try {
+//         await storage.bucket('bortube_bucket').file(blobName).save(videoFile.buffer);
+//         return true;
+//     } catch (error) {
+//         console.error("Error uploading video:", error);
+//         return false;
+//     }
+// }
 
 
-export async function deleteVideoGoogleCloud(videoUrl: string) {
-    if (azureStorageConnectionString == undefined) {
-        return false;
-    }
+// export async function deleteVideoGoogleCloud(videoUrl: string) {
+//     if (azureStorageConnectionString == undefined) {
+//         return false;
+//     }
 
-    const storage = new Storage({ projectId: 'theta-grid-417116', keyFilename: 'assets\\gcp-key.json' });
-    const blobName = extractFileNameFromURL(videoUrl);
-    if (!blobName) {
-        return false;
-    }
+//     const storage = new Storage({ projectId: 'theta-grid-417116', keyFilename: 'assets\\gcp-key.json' });
+//     const blobName = extractFileNameFromURL(videoUrl);
+//     if (!blobName) {
+//         return false;
+//     }
 
-    try {
-        await storage.bucket('bortube_bucket').file(blobName).delete();
-        return true;
-    } catch (error) {
-        console.error("Error uploading video:", error);
-        return false;
-    }
-}
+//     try {
+//         await storage.bucket('bortube_bucket').file(blobName).delete();
+//         return true;
+//     } catch (error) {
+//         console.error("Error uploading video:", error);
+//         return false;
+//     }
+// }
 
 export function extractFileNameFromURL(url: string): string | null {
     const lastSlashIndex = url.lastIndexOf('/');
