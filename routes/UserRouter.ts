@@ -25,22 +25,7 @@ export class UserRouter {
 
     private login = (req: Request, res: Response) => {
         //  #swagger.description = 'Login a user'
-        //  #swagger.parameters['body'] = {
-        //   in: 'body',
-        //   required: true,
-        //   type: 'object',
-        //   schema: 
-        //    {username: '
-        //      type: 'string',
-        //      required: true,
-        //      description: 'The email of the user'
-        //    },
-        //    {password: '
-        //      type: 'string',
-        //      required: true,
-        //      description: 'The password of the user'
-        //    }
-        // }
+        // Needs {username, password}
         console.log("Login request: ", req.body);
         res.status(200).json({ message: 'Login successful', userId: req.user?.id });
     }
