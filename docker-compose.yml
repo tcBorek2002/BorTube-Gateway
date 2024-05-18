@@ -1,13 +1,36 @@
 version: '3.9'
 
 services:
-  video-microservice:
+  bortube_video_microservice:
+    build:
+      context: ../../Backend/BorTube-Video-Microservice
+      dockerfile: Dockerfile
+    container_name: bortube_video_microservice_container
+
+  bortube_video_uploading_microservice:
+    build:
+      context: ../../Backend/BorTube-Video-Upload-Microservice
+      dockerfile: Dockerfile
+    container_name: bortube_video_uploading_microservice_container
+
+  bortube_user_microservice:
+    build:
+      context: ../../Backend/BorTube-User-Microservice
+      dockerfile: Dockerfile
+    container_name: bortube_user_microservice_container
+
+  bortube_gateway:
     build:
       context: .
-      dockerfile: Dockerfile  # Specify the path to your Dockerfile if it's not in the current directory
-    container_name: bortube-video-microservice-container
+      dockerfile: Dockerfile
+    container_name: bortube_gateway_container
     ports:
       - "8000:8000"
-    environment:
-      - DATABASE_URL="postgres://myuser:mysecretpassword@host.docker.internal:5432/bortube-db"
 
+  bortube_frontend:
+    build:
+      context: ../../Frontend/BorTube-frontend
+      dockerfile: Dockerfile
+    container_name: bortube_frontend-container
+    ports:
+      - "8080:80"
