@@ -86,7 +86,7 @@ passport.deserializeUser((user: Express.User, done) => {
 
 app.use(bodyParser.json());
 app.use((req, res, next) => {
-  res.setHeader('Access-Control-Allow-Origin', 'http://localhost:8080');
+  res.setHeader('Access-Control-Allow-Origin', 'http://localhost');
   res.header('Access-Control-Allow-Headers', 'Content-Type');
   res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
   res.header('Access-Control-Allow-Credentials', 'true');
