@@ -15,12 +15,12 @@ export class UserRouter {
         this.userService = userService;
 
         // add prefix to all routes
-        this.usersRouter.post('/login', passport.authenticate('local', { failWithError: true }), this.login);
-        this.usersRouter.post('/logout', this.logout);
-        this.usersRouter.get('/users/:id', this.getUserById);
-        this.usersRouter.put('/users/:id', this.updateUser);
-        this.usersRouter.post('/users', this.createUser);
-        this.usersRouter.delete('/users/:id', this.deleteUser);
+        this.usersRouter.post('/api/login', passport.authenticate('local', { failWithError: true }), this.login);
+        this.usersRouter.post('/api/logout', this.logout);
+        this.usersRouter.get('/api/users/:id', this.getUserById);
+        this.usersRouter.put('/api/users/:id', this.updateUser);
+        this.usersRouter.post('/api/users', this.createUser);
+        this.usersRouter.delete('/api/users/:id', this.deleteUser);
     }
 
     private login = (req: Request, res: Response) => {

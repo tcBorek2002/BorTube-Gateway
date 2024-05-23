@@ -107,7 +107,7 @@ app.use(
 app.disable("x-powered-by");
 const port = process.env.PORT ?? 8000;
 
-app.get('/', (req: Request, res: Response) => {
+app.get('/api', (req: Request, res: Response) => {
   res.send('Welcome to BorTube API!');
 });
 

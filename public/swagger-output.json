@@ -11,7 +11,7 @@
     "http"
   ],
   "paths": {
-    "/login": {
+    "/api/login": {
       "post": {
         "description": "Login a user",
         "responses": {
@@ -21,7 +21,7 @@
         }
       }
     },
-    "/logout": {
+    "/api/logout": {
       "post": {
         "description": "Logout a user",
         "responses": {
@@ -34,7 +34,7 @@
         }
       }
     },
-    "/users/{id}": {
+    "/api/users/{id}": {
       "get": {
         "description": "Get a user by its ID",
         "parameters": [
@@ -147,7 +147,7 @@
         }
       }
     },
-    "/users": {
+    "/api/users": {
       "post": {
         "description": "Create a new user",
         "parameters": [
@@ -183,7 +183,7 @@
         }
       }
     },
-    "/videos": {
+    "/api/videos": {
       "get": {
         "description": "",
         "responses": {
@@ -236,7 +236,7 @@
         }
       }
     },
-    "/videos/{id}": {
+    "/api/videos/{id}": {
       "get": {
         "description": "Get a video by its ID",
         "parameters": [
@@ -337,7 +337,7 @@
         }
       }
     },
-    "/videos/{id}/uploaded": {
+    "/api/videos/{id}/uploaded": {
       "post": {
         "description": "",
         "parameters": [

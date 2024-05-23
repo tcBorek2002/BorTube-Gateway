@@ -22,12 +22,12 @@ export class VideoRouter {
         this.uploadService = uploadService;
 
         // add prefix to all routes
-        this.videosRouter.get('/videos', this.getAllVideos);
-        this.videosRouter.get('/videos/:id', this.getVideoById);
-        this.videosRouter.put('/videos/:id', this.updateVideo);
-        this.videosRouter.post('/videos', this.upload.single('video'), this.createVideo);
-        this.videosRouter.delete('/videos/:id', this.deleteVideo);
-        this.videosRouter.post('/videos/:id/uploaded', this.videoUploaded);
+        this.videosRouter.get('/api/videos', this.getAllVideos);
+        this.videosRouter.get('/api/videos/:id', this.getVideoById);
+        this.videosRouter.put('/api/videos/:id', this.updateVideo);
+        this.videosRouter.post('/api/videos', this.upload.single('video'), this.createVideo);
+        this.videosRouter.delete('/api/videos/:id', this.deleteVideo);
+        this.videosRouter.post('/api/videos/:id/uploaded', this.videoUploaded);
     }
 
     private videoUploaded = (req: Request, res: Response) => {
