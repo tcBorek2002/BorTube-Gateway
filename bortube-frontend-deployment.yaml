@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: C:\Users\Borek\Documents\Kompose\kompose.exe convert
+    kompose.version: 1.26.0 (40646f47)
+  creationTimestamp: null
+  labels:
+    io.kompose.service: bortube-frontend
+  name: bortube-frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: bortube-frontend
+  strategy: {}
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: C:\Users\Borek\Documents\Kompose\kompose.exe convert
+        kompose.version: 1.26.0 (40646f47)
+      creationTimestamp: null
+      labels:
+        io.kompose.service: bortube-frontend
+    spec:
+      imagePullSecrets:
+        - name: bortube-pull-secret
+      containers:
+        - image: bortubecontainers.azurecr.io/bortube/frontend:latest
+          name: bortube-frontend-container
+          ports:
+            - containerPort: 80
+          resources: {}
+      restartPolicy: Always
+status: {}
