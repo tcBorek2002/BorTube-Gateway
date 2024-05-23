@@ -1,4 +1,4 @@
-version: '3.9'
+version: '3'
 
 services:
   bortube_video_microservice:
@@ -33,4 +33,4 @@ services:
       dockerfile: Dockerfile
     container_name: bortube_frontend-container
     ports:
-      - "8080:80"
+      - "80:80"
