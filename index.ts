@@ -14,6 +14,7 @@ import passport from 'passport';
 import { Strategy as LocalStrategy } from 'passport-local';
 import { NotFoundError } from './errors/NotFoundError';
 import { User } from './entities/user/User';
+import rateLimit from 'express-rate-limit';
 
 
 declare global {
@@ -51,6 +52,18 @@ const rabbitUserService = new RabbitUserService(rabbit);
 const videoRouter = new VideoRouter(new RabbitVideoService(rabbit), new RabbitVideoUploadService(rabbit)).getRouter();
 const usersRouter = new UserRouter(rabbitUserService).getRouter();
 
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  limit: 100, // Limit each IP to 100 requests per `window` (here, per 15 minutes).
+  standardHeaders: 'draft-7', // draft-6: `RateLimit-*` headers; draft-7: combined `RateLimit` header
+  legacyHeaders: false, // Disable the `X-RateLimit-*` headers.
+  // store: ... , // Redis, Memcached, etc. See below.
+})
+
+let noRateLimit = process.env.NO_RATE_LIMIT === 'true';
+
+console.log('Rate limiting:', noRateLimit ? 'disabled' : 'enabled');
+
 const app: Application = express();
 if (!process.env.SESSION_SECRET) {
   console.error('SESSION_SECRET is not set in the environment variables');
@@ -61,6 +74,10 @@ app.use(session({
   resave: false,
   saveUninitialized: false,
 }));
+
+if (!noRateLimit) {
+  app.use(limiter);
+}
 
 app.use(passport.initialize());
 app.use(passport.session());
