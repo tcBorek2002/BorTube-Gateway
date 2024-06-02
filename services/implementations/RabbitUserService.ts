@@ -101,7 +101,7 @@ export class RabbitUserService implements IUserService {
         await rpcClient.close()
 
         if (!res.body) {
-            throw new InternalServerError(500, 'Invalid response delete-user-by-id: ' + res.body);
+            throw new InternalServerError(500, 'Invalid response delete-user: ' + res.body);
         }
 
         if (ResponseDto.isResponseDto(res.body)) {
