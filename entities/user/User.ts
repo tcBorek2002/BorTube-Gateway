@@ -5,12 +5,14 @@ export class User {
     email: string;
     password: string;
     displayName: string;
+    permissionGrantedDate?: Date;
 
-    constructor(id: string, email: string, password: string, displayName: string) {
+    constructor(id: string, email: string, password: string, displayName: string, permissionGrantedDate?: Date) {
         this.id = id;
         this.email = email;
         this.password = password;
         this.displayName = displayName;
+        this.permissionGrantedDate = permissionGrantedDate;
     }
 
     // Function that creates a UserDto from user entity
@@ -18,7 +20,8 @@ export class User {
         return {
             id: this.id,
             email: this.email,
-            displayName: this.displayName
+            displayName: this.displayName,
+            permissionGrantedDate: this.permissionGrantedDate
         };
     }
 }
