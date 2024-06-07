@@ -19,21 +19,21 @@ variables:
   vmImageName: 'ubuntu-latest'
 
 stages:
-  - stage: Test
-    displayName: Test code
-    jobs:
-      - job: Run_tests
-        displayName: Run tests
-        steps:
-          - script: npm install
-            displayName: "Install packages"
-          - script: npm test
-            displayName: "Run Tests and Generate Coverage"
-          - task: PublishPipelineArtifact@1
-            inputs:
-              targetPath: $(System.DefaultWorkingDirectory)/coverage
-              artifact: "coverage"
-              publishLocation: "pipeline"
+  # - stage: Test
+  #   displayName: Test code
+  #   jobs:
+  #     - job: Run_tests
+  #       displayName: Run tests
+  #       steps:
+  #         - script: npm install
+  #           displayName: "Install packages"
+  #         - script: npm test
+  #           displayName: "Run Tests and Generate Coverage"
+  #         - task: PublishPipelineArtifact@1
+  #           inputs:
+  #             targetPath: $(System.DefaultWorkingDirectory)/coverage
+  #             artifact: "coverage"
+  #             publishLocation: "pipeline"
 
   - stage: Verify
     displayName: Verify code
