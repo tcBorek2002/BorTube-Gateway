@@ -41,12 +41,12 @@ stages:
       - job: Run_SonarQube_Analysis
         displayName: Run SonarQube analysis
         steps:
-          - task: DownloadPipelineArtifact@2
-            inputs:
-              buildType: "current"
-              project: "$(System.TeamProjectId)"
-              artifactName: "coverage"
-              targetPath: $(System.DefaultWorkingDirectory)/coverage
+          # - task: DownloadPipelineArtifact@2
+          #   inputs:
+          #     buildType: "current"
+          #     project: "$(System.TeamProjectId)"
+          #     artifactName: "coverage"
+          #     targetPath: $(System.DefaultWorkingDirectory)/coverage
           - task: SonarQubePrepare@5
             inputs:
               SonarQube: "SonarQube-Eindhoven"
