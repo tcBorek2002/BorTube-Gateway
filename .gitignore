@@ -37,3 +37,4 @@ npm-debug.log
 .env
 assets/gcp-key.json
 .scannerwork/report-task.txt
+gateway-secret.yaml
