@@ -6,23 +6,53 @@ import { ResponseDto } from "../../dtos/ResponseDto";
 import { ErrorDto } from "../../dtos/ErrorDto";
 import { InvalidInputError } from "../../errors/InvalidInputError";
 import { NotFoundError } from "../../errors/NotFoundError";
-import { VideoDto } from "../../entities/video/VideoDto";
+import { IUserService } from "../IUserService";
+import { User } from "../../entities/user/User";
+import { UserDto } from "../../dtos/UserDto";
 
-export class RabbitVideoService implements IVideoService {
+export class RabbitUserService implements IUserService {
     private rabbit: Connection;
 
     constructor(connection: Connection) {
         this.rabbit = connection;
     }
-
-    async getAllVideos(): Promise<VideoDto[]> {
+    async authenticateUser(email: string, password: string): Promise<UserDto> {
         const rpcClient = this.rabbit.createRPCClient({ confirm: true })
 
-        const res = await rpcClient.send('get-all-videos', '');
+        const res = await rpcClient.send('authenticate-user', { email, password });
         await rpcClient.close()
 
         if (!res || !res.body || res.contentType !== 'application/json' || !ResponseDto.isResponseDto(res.body)) {
-            throw new InternalServerError(500, 'Invalid response get-all-videos: ' + res.body);
+            throw new InternalServerError(500, 'Invalid response authenticate-user: ' + res.body);
+        }
+
+        const response = res.body;
+        if (response.success === false) {
+            let error: ErrorDto = response.data as ErrorDto;
+            if (error.code == 401) {
+                throw new NotFoundError(401, error.message);
+            }
+            else if (error.code == 400) {
+                throw new InvalidInputError(400, error.message);
+            }
+            else {
+                throw new InternalServerError(500, error.message);
+            }
+        }
+        else {
+            let user: User = response.data as User;
+            return UserDto.fromUser(user);
+        }
+    }
+
+    async getAllUsers(): Promise<UserDto[]> {
+        const rpcClient = this.rabbit.createRPCClient({ confirm: true })
+
+        const res = await rpcClient.send('get-all-users', '');
+        await rpcClient.close()
+
+        if (!res || !res.body || res.contentType !== 'application/json' || !ResponseDto.isResponseDto(res.body)) {
+            throw new InternalServerError(500, 'Invalid response get-all-users: ' + res.body);
         }
 
         const response = res.body;
@@ -31,40 +61,47 @@ export class RabbitVideoService implements IVideoService {
             throw new InternalServerError(500, error.message);
         }
         else {
-            let videos: VideoDto[] = response.data as VideoDto[];
-            return videos;
+            let users: User[] = response.data as User[];
+            let dtos = users.map(user => UserDto.fromUser(user));
+            return dtos;
         }
     }
-
-    async getAllVisibleVideos(): Promise<VideoDto[]> {
+    async getUserById(id: string): Promise<UserDto> {
         const rpcClient = this.rabbit.createRPCClient({ confirm: true })
 
-        const res = await rpcClient.send('get-all-visible-videos', '');
+        const res = await rpcClient.send('get-user-by-id', { id });
         await rpcClient.close()
 
         if (!res || !res.body || res.contentType !== 'application/json' || !ResponseDto.isResponseDto(res.body)) {
-            throw new InternalServerError(500, 'Invalid response get-all-visible-videos: ' + res.body);
+            throw new InternalServerError(500, 'Invalid response get-user-by-id: ' + res.body);
         }
 
         const response = res.body;
         if (response.success === false) {
             let error: ErrorDto = response.data as ErrorDto;
-            throw new InternalServerError(500, error.message);
+            if (error.code == 404) {
+                throw new NotFoundError(404, error.message);
+            }
+            else if (error.code == 400) {
+                throw new InvalidInputError(400, error.message);
+            }
+            else {
+                throw new InternalServerError(500, error.message);
+            }
         }
         else {
-            let videos: VideoDto[] = response.data as VideoDto[];
-            return videos;
+            let user: User = response.data as User;
+            return UserDto.fromUser(user);
         }
     }
-
-    async getVideoById(id: string): Promise<VideoDto> {
+    async deleteUserById(id: string): Promise<UserDto> {
         const rpcClient = this.rabbit.createRPCClient({ confirm: true })
 
-        const res = await rpcClient.send('get-video-by-id', { id });
+        const res = await rpcClient.send('delete-user', { id });
         await rpcClient.close()
 
         if (!res.body) {
-            throw new InternalServerError(500, 'Invalid response get-video-by-id: ' + res.body);
+            throw new InternalServerError(500, 'Invalid response delete-user: ' + res.body);
         }
 
         if (ResponseDto.isResponseDto(res.body)) {
@@ -82,22 +119,53 @@ export class RabbitVideoService implements IVideoService {
                 }
             }
             else {
-                let video: VideoDto = response.data as VideoDto;
-                return video;
+                let user: User = response.data as User;
+                return UserDto.fromUser(user);
             }
         }
         else {
             throw new InternalServerError(500, 'Parsing of message failed');
         }
     }
-    async deleteVideoByID(id: string): Promise<VideoDto> {
+
+    async createUser(email: string, password: string, displayName: string): Promise<UserDto> {
         const rpcClient = this.rabbit.createRPCClient({ confirm: true })
 
-        const res = await rpcClient.send('delete-video', { id });
+        const res = await rpcClient.send('create-user', { email, password, displayName });
         await rpcClient.close()
 
         if (!res.body) {
-            throw new InternalServerError(500, 'Invalid response delete-video-by-id: ' + res.body);
+            throw new InternalServerError(500, 'Invalid response create user: ' + res.body);
+        }
+
+        if (ResponseDto.isResponseDto(res.body)) {
+            let response = res.body;
+            if (response.success === false) {
+                let error: ErrorDto = response.data as ErrorDto;
+                if (error.code == 400) {
+                    throw new InvalidInputError(400, error.message);
+                }
+                else {
+                    throw new InternalServerError(500, error.message);
+                }
+            }
+            else {
+                let user = (response.data as User);
+                return UserDto.fromUser(user);
+            }
+        }
+        else {
+            throw new InternalServerError(500, 'Parsing of message failed');
+        }
+    }
+    async updateUser({ id, email, password, displayName }: { id: string; email?: string | undefined; password?: string | undefined; displayName?: string | undefined; }): Promise<UserDto> {
+        const rpcClient = this.rabbit.createRPCClient({ confirm: true })
+
+        const res = await rpcClient.send('update-user', { id, email, password, displayName });
+        await rpcClient.close()
+
+        if (!res.body) {
+            throw new InternalServerError(500, 'Invalid response update user: ' + res.body);
         }
 
         if (ResponseDto.isResponseDto(res.body)) {
@@ -115,73 +183,8 @@ export class RabbitVideoService implements IVideoService {
                 }
             }
             else {
-                let video: VideoDto = response.data as VideoDto;
-                return video;
-            }
-        }
-        else {
-            throw new InternalServerError(500, 'Parsing of message failed');
-        }
-    }
-
-    async createVideo(userId: string, title: string, description: string, fileName: string, duration: number): Promise<{ video: VideoDto, sasUrl: string }> {
-        const rpcClient = this.rabbit.createRPCClient({ confirm: true })
-
-        const res = await rpcClient.send('create-video', { userId, title, description, fileName, duration });
-        await rpcClient.close()
-
-        if (!res.body) {
-            throw new InternalServerError(500, 'Invalid response create video: ' + res.body);
-        }
-
-        if (ResponseDto.isResponseDto(res.body)) {
-            let response = res.body;
-            if (response.success === false) {
-                let error: ErrorDto = response.data as ErrorDto;
-                if (error.code == 400) {
-                    throw new InvalidInputError(400, error.message);
-                }
-                else {
-                    throw new InternalServerError(500, error.message);
-                }
-            }
-            else {
-                let returnObject = (response.data as { video: VideoDto, sasUrl: string });
-                return returnObject;
-            }
-        }
-        else {
-            throw new InternalServerError(500, 'Parsing of message failed');
-        }
-    }
-
-    async updateVideo({ id, title, description, videoState }: { id: string; title?: string | undefined; description?: string | undefined; videoState?: any; }): Promise<VideoDto> {
-        const rpcClient = this.rabbit.createRPCClient({ confirm: true })
-
-        const res = await rpcClient.send('update-video', { id, title, description, videoState });
-        await rpcClient.close()
-
-        if (!res.body) {
-            throw new InternalServerError(500, 'Invalid response update video: ' + res.body);
-        }
-
-        if (ResponseDto.isResponseDto(res.body)) {
-            let response = res.body;
-            if (response.success === false) {
-                let error: ErrorDto = response.data as ErrorDto;
-                if (error.code == 400) {
-                    throw new InvalidInputError(400, error.message);
-                }
-                else if (error.code == 404) {
-                    throw new NotFoundError(404, error.message);
-                }
-                else {
-                    throw new InternalServerError(500, error.message);
-                }
-            }
-            else {
-                let video: VideoDto = response.data as VideoDto;
-                return video;
+                let user: User = response.data as User;
+                return UserDto.fromUser(user);
             }
         }
         else {
@@ -190,6 +193,3 @@ export class RabbitVideoService implements IVideoService {
     }
 }
 
-function isVideo(obj: any): obj is Video {
-    return obj && obj.id && typeof obj.id === 'number' && obj.title && typeof obj.title === 'string' && obj.description && typeof obj.description === 'string' && obj.videoState;
-}
