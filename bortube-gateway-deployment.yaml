@@ -31,5 +31,8 @@ spec:
           ports:
             - containerPort: 8000
           resources: {}
+          envFrom:
+            - secretRef:
+                name: gateway-secret
       restartPolicy: Always
 status: {}
